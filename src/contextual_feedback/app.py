@@ -5,7 +5,6 @@ import threading
 from collections import Counter
 from datetime import datetime
 
-import pdfplumber
 import requests
 from flask import Flask, g, jsonify, request
 
@@ -174,6 +173,8 @@ def extract_text(file_path, file_type):
         with open(file_path, encoding="utf-8") as f:
             return f.read()
     elif file_type == "pdf":
+        import pdfplumber
+
         text = ""
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:

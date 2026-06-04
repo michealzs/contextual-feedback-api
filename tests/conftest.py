@@ -35,21 +35,25 @@ def server(tmp_path_factory):
         "CONTEXTUAL_PORT": str(port),
         "API_KEY": API_KEY,
     }
+    log_file = data_dir / "server.out"
+    fh = open(log_file, "w")
     proc = subprocess.Popen(
         [sys.executable, "-m", "contextual_feedback"],
-        cwd=PROJECT_ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        cwd=PROJECT_ROOT, env=env, stdout=fh, stderr=subprocess.STDOUT,
     )
     base = f"http://127.0.0.1:{port}"
-    deadline = time.time() + 30
+    deadline = time.time() + 60
     try:
         while time.time() < deadline:
+            if proc.poll() is not None:  # crashed early
+                raise RuntimeError(f"server exited ({proc.returncode}):\n{log_file.read_text()}")
             try:
                 if requests.get(f"{base}/api/v1/health", timeout=1).status_code == 200:
                     break
             except requests.RequestException:
                 time.sleep(0.3)
         else:
-            raise RuntimeError("server did not start")
+            raise RuntimeError(f"server did not start in time:\n{log_file.read_text()}")
         yield {"base": base, "data_dir": data_dir}
     finally:
         proc.terminate()
