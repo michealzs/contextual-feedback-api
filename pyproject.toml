@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "contextual-feedback"
+version = "0.1.0"
+description = "Flask document-analysis API with API-key auth, async jobs, webhooks, and chunked mock inference"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["flask", "sqlite", "rest-api", "async-jobs", "webhooks", "document-analysis"]
+dependencies = [
+    "Flask>=3.0,<4",
+    "pdfplumber>=0.11,<0.12",
+    "requests>=2.32,<3",
+    "gunicorn>=21,<23",
+    "prometheus-flask-exporter>=0.23,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.4"]
+
+[project.scripts]
+contextual-feedback = "contextual_feedback.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/contextual_feedback"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+# The app module is a faithful port of the reference implementation.
+"src/contextual_feedback/app.py" = ["E501", "E722", "B008"]

@@ -1,0 +1,31 @@
+groups:
+  - name: contextual-feedback
+    rules:
+      - alert: ServiceDown
+        expr: up{job="contextual-feedback"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "contextual-feedback is not being scraped"
+          description: "Prometheus has not scraped the service for over 1 minute."
+
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(flask_http_request_total{status=~"5.."}[5m]))
+            / sum(rate(flask_http_request_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated 5xx error rate"
+          description: "More than 5% of requests are failing over the last 5 minutes."
+
+      - alert: AuthFailureSpike
+        expr: increase(flask_http_request_total{status="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in 401 responses"
+          description: "More than 50 unauthorized responses in 5 minutes — possible bad keys or probing."
