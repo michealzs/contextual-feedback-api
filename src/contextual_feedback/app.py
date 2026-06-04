@@ -60,7 +60,7 @@ STOPWORDS = {
 
 
 def init_db():
-    os.makedirs("/app/data", exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
